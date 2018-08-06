@@ -1,8 +1,9 @@
+require 'byebug'
 class MaxIntSet
   def initialize(max)
     @max = max
     @store = Array.new(max, false)
-    p @store
+    # p @store
   end
 
   def insert(num)
@@ -36,7 +37,7 @@ class IntSet
   def initialize(num_buckets = 20)
     @store = Array.new(num_buckets) { Array.new }
     @num_buckets = num_buckets
-    p @store
+    # p @store
   end
 
   def insert(num)
@@ -71,15 +72,35 @@ class ResizingIntSet
   def initialize(num_buckets = 20)
     @store = Array.new(num_buckets) { Array.new }
     @count = 0
+    @num_buckets = num_buckets
   end
 
   def insert(num)
+    if @count == @num_buckets
+      resize!
+    end
+
+    bucket = num % @num_buckets
+    # debugger
+    unless @store[bucket].include?(num)
+      @store[bucket] << num
+      @count += 1
+    end
+
+    # true
   end
 
   def remove(num)
+     bucket = num % @num_buckets
+     if @store[bucket].delete(num)
+      @count -= 1
+     end
   end
 
   def include?(num)
+    bucket = num % @num_buckets
+    return true if @store[bucket].include?(num)
+    false
   end
 
   private
@@ -93,5 +114,16 @@ class ResizingIntSet
   end
 
   def resize!
+    oldstore = @store
+    @store = Array.new(@count * 2) { Array.new }
+    # p @store
+    @num_buckets *= 2
+    oldstore.each do |bucket|
+      bucket.each do |el|
+        bucketer = el % @num_buckets
+        @store[bucketer] << el
+      end
+    end
+
   end
 end
